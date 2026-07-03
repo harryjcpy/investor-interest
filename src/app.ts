@@ -1,12 +1,22 @@
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.routes";
+import { authenticate } from "./middleware/auth.middleware";
+import interestRoutes from "./routes/interest.routes";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/interests", interestRoutes);
+
+app.get("/profile", authenticate, (req, res) => {
+  return res.json({
+    success: true,
+    user: req.user,
+  });
+});
 
 app.get("/", (req, res) => {
     res.json({
