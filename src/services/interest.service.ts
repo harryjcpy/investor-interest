@@ -1,4 +1,5 @@
 import prisma from "../prisma/client";
+import { publisher } from "../redis/publisher";
 
 export async function expressInterest(investorId: number, startupId: number) {
   const startup = await prisma.startup.findUnique({
@@ -25,11 +26,19 @@ export async function expressInterest(investorId: number, startupId: number) {
   }
 
   const interest = await prisma.interest.create({
-  data: {
-    investorId,
-    startupId,
-  },
-});
+    data: {
+      investorId,
+      startupId,
+    },
+  });
 
-return interest;
+  await publisher.publish(
+    "new-interest",
+    JSON.stringify({
+      investorId,
+      startupId,
+    }),
+  );
+
+  return interest;
 }
